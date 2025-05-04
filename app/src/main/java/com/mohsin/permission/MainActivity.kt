@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private var _binding : ActivityMainBinding? = null
     private val binding get() = _binding!!
 
+    /**Camera Permission Launcher*/
     private val cameraResultLauncher : ActivityResultLauncher<String> =
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()){
@@ -30,6 +31,52 @@ class MainActivity : AppCompatActivity() {
                         "Permission denied for camera.", Toast.LENGTH_LONG).show()
                 }
             }
+
+    /**Multiple Permission Launcher*/
+    private val cameraAndLocationResultLauncher : ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()){
+            permisssion ->
+            permisssion.entries.forEach {
+                val permissionName = it.key
+                val isGranted = it.value
+                if (isGranted){
+                    if (permissionName == Manifest.permission.ACCESS_FINE_LOCATION){
+                        Toast.makeText(this,
+                            "Permission granted for fine location.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }else if(permissionName == Manifest.permission.ACCESS_COARSE_LOCATION){
+                        Toast.makeText(this,
+                            "Permission granted for course location.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }else{
+                        Toast.makeText(this,
+                            "Permission granted for camera.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }else{
+                    if (permissionName == Manifest.permission.ACCESS_FINE_LOCATION){
+                        Toast.makeText(this,
+                            "Permission denied for location.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }else if(permissionName == Manifest.permission.ACCESS_COARSE_LOCATION){
+                        Toast.makeText(this,
+                            "Permission denied for course location.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }else{
+                        Toast.makeText(this,
+                            "Permission denied for camera.",
+                            Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +91,16 @@ class MainActivity : AppCompatActivity() {
         binding.btnRequestCameraPermission.setOnClickListener{
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
-                showRationaleDialog("Permission Demo requires camera access",
-                    "Camera cannot be used because Camera access is denied.")
+                showRationaleDialog("Permission Demo requires camera and Location access",
+                    "Camera cannot be used because Camera and location access is denied.")
             }else{
-                cameraResultLauncher.launch(Manifest.permission.CAMERA)
+                cameraAndLocationResultLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
             }
         }
     }
